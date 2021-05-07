@@ -15,14 +15,8 @@ migrate = Migrate(app, db)
 manager = LoginManager(app)
 admin.init_app(app)
 
-
-@app.template_filter('formatdatetime')
-def format_datetime(value, format="%d %b"):
-    if value is None:
-        return ""
-    return value.strftime(format)
-
-
+from templatefilter import *
+from context_processor import *
 from views import *
 
 if __name__ == '__main__':

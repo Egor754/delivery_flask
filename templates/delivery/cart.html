@@ -7,7 +7,13 @@
         {% if mess %}
             <div class="alert alert-warning" role="alert">{{ mess }}</div>
         {% endif %}
-        <div class="alert alert-warning" role="alert">Блюдо удалено из корзины</div>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                    {% for message in messages %}
+                                <div class="alert alert-warning" role="alert">{{ message }}</div>
+                    {% endfor %}
+            {% endif %}
+        {% endwith %}
         {% if not current_user.is_authenticated %}
             <div class="alert alert-warning" role="alert">Чтобы сделать заказ – <a href="{{ url_for('login_view') }}">войдите</a>
                 или <a
@@ -54,11 +60,9 @@
 
 
         </div>
-
-
-        {#    <div class="col-1"></div>#}
         <div class="col-7">
-            <h4 class="mb-3 col-7 mb-5">{{ session['cart']|length }} блюда в корзине</h4>
+            <h4 class="mb-3 col-7 mb-5">{{ session['cart']|length }} {{ session['cart']|length|ru_pluralize }} в
+                корзине</h4>
             <table class="table">
                 <tbody>
                 {% for food in foods %}
@@ -67,7 +71,7 @@
                         <td></td>
                         <td>1</td>
                         <td>{{ food.price }}</td>
-                        <td><a class="text-danger" href="#">Удалить</a></td>
+                        <td><a class="text-danger" href="{{ url_for('del_to_cart',pk=food.id) }}">Удалить</a></td>
                     </tr>
                 {% endfor %}
 

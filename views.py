@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, url_for, request
+from flask import render_template, session, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import app, db, manager
@@ -24,6 +24,17 @@ def add_to_cart(pk):
     if pk not in cart:
         cart.append(pk)
         session['cart'] = cart
+    flash('Товар добавлен в корзину')
+    return redirect(url_for('cart_view'))
+
+
+@app.route('/deltocart/<int:pk>/')
+def del_to_cart(pk):
+    try:
+        session['cart'].remove(pk)
+        flash('Товар удален из корзины')
+    except ValueError:
+        flash('Такого товара нет в корзине')
     return redirect(url_for('cart_view'))
 
 
@@ -31,22 +42,23 @@ def add_to_cart(pk):
 def cart_view():
     form = OrderForm()
     foods = Food.query.filter(Food.id.in_(session['cart']))
-    amount = sum(sub.price for sub in foods)
     if request.method == 'POST' and form.validate_on_submit() and current_user.is_authenticated:
+        if foods:
+            flash('Вы ничего не выбрали')
+            return render_template('delivery/cart.html', form=form)
         orders = Orders(
-            amount=amount,
+            amount=sum(sub.price for sub in foods),
             status='good',
             phone=form.phone.data,
             address=form.address.data,
             user=User.query.get(current_user.get_id())
-
         )
         db.session.add(orders)
         for food in foods:
             orders.food.append(food)
         db.session.commit()
         return redirect(url_for('ordered_view'))
-    return render_template('delivery/cart.html', form=form, amount=amount, foods=foods)
+    return render_template('delivery/cart.html', form=form)
 
 
 @app.route('/account/')
@@ -78,7 +90,10 @@ def login_view():
         if user and user.password_valid(form.password.data):
             login_user(user)
             next_page = request.args.get('next')
-            return redirect(next_page)
+            if next_page:
+                return redirect(next_page)
+            else:
+                return redirect(url_for('main_view'))
         else:
             form.email.errors.append("Не верное имя или пароль")
     return render_template('delivery/login.html', form=form)
