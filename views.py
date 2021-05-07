@@ -75,7 +75,6 @@ def login_view():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         user = User.query.filter_by(mail=form.email.data).first()
-        # Теперь пароль проверяется методом password_valid
         if user and user.password_valid(form.password.data):
             login_user(user)
             next_page = request.args.get('next')
