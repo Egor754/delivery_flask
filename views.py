@@ -43,7 +43,7 @@ def cart_view():
     form = OrderForm()
     foods = Food.query.filter(Food.id.in_(session['cart']))
     if request.method == 'POST' and form.validate_on_submit() and current_user.is_authenticated:
-        if foods:
+        if not foods:
             flash('Вы ничего не выбрали')
             return render_template('delivery/cart.html', form=form)
         orders = Orders(
@@ -57,6 +57,7 @@ def cart_view():
         for food in foods:
             orders.food.append(food)
         db.session.commit()
+        session.pop('cart',None)
         return redirect(url_for('ordered_view'))
     return render_template('delivery/cart.html', form=form)
 
