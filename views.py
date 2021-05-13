@@ -57,7 +57,7 @@ def cart_view():
         for food in foods:
             orders.food.append(food)
         db.session.commit()
-        session.pop('cart',None)
+        session.pop('cart', None)
         return redirect(url_for('ordered_view'))
     return render_template('delivery/cart.html', form=form)
 

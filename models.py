@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     mail = db.Column(db.String(255), nullable=False, unique=True)
+    is_admin = db.Column(db.Boolean, server_default='false', nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     orders = db.relationship('Orders', back_populates="user")
 
@@ -53,10 +54,14 @@ class Category(db.Model):
     food = db.relationship('Food', back_populates='category')
 
 
+def current_time():
+    return datetime.now(pytz.timezone('Europe/Moscow'))
+
+
 class Orders(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=datetime.now(pytz.timezone('Europe/Moscow')))
+    date = db.Column(db.DateTime, default=current_time)
     amount = db.Column(db.Float())
     status = db.Column(db.String(100))
     phone = db.Column(db.String(15))
